@@ -3,6 +3,7 @@ import plotly.graph_objs as go
 import threading
 import time
 import random
+from dash import callback
 
 app=Dash(__name__)
 app.title="MemePulse"
@@ -46,7 +47,7 @@ app.layout=html.Div([
   ])
  ],style={'padding':'40px','background':'#111','borderRadius':'25px','margin':'30px'}),
 
- dcc.Interval(interval=1000)
+ dcc.Interval(id='interval', interval=1000)
 ],style={'background':'#000','color':'white','fontFamily':'Arial','minHeight':'100vh','padding':'20px'})
 
 @callback([Output('live','figure'),Output('free-msg','children')],[Input('interval','n_intervals'),Input('free','n_clicks')])
