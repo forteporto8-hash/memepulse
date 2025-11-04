@@ -6,18 +6,23 @@ import random
 
 app = Dash(__name__)
 app.title = "MemePulse"
-server = app.server  # <- для Gunicorn
+server = app.server  # для Gunicorn
 
 data = []
 free_used = 0
 
+# ---------------------- ГЕНЕРАТОР ДАННЫХ ----------------------
 def run():
     global data
     memes = ["AI cat", "Trump egg", "Viral dance", "Moon meme", "Doge 2.0", "Bishkek vibe", "Kyrgyz meme"]
     while True:
-        data = [{"meme": random.choice(memes), "growth": random.randint(80,380)} for _ in range(10)]
+        data = [{"meme": random.choice(memes), "growth": random.randint(80, 380)} for _ in range(10)]
         time.sleep(1)
 
+# ВАЖНО: поток запускается СРАЗУ, даже на Render
+threading.Thread(target=run, daemon=True).start()
+
+# ---------------------- LAYOUT ----------------------
 app.layout = html.Div([
     html.Div([
         html.H1("MemePulse", style={'color':'#00D4FF','fontSize':'72px','fontWeight':'bold','margin':'0'}),
@@ -59,25 +64,27 @@ app.layout = html.Div([
     dcc.Interval(id='interval', interval=1000)
 ], style={'background':'#000','color':'white','fontFamily':'Arial','minHeight':'100vh','padding':'20px'})
 
+# ---------------------- CALLBACK ----------------------
 @callback([Output('live','figure'), Output('free-msg','children')],
           [Input('interval','n_intervals'), Input('free','n_clicks')])
 def update(_, click):
     global free_used
-    msg=""
+    msg = ""
     if click and free_used < 3:
         free_used += 1
         msg = f"Free meme #{free_used} unlocked! {3-free_used} left"
+
     fig = go.Figure(go.Bar(
         x=[i['growth'] for i in data],
         y=[i['meme'] for i in data],
         orientation='h',
-        marker=dict(color=['#00D4FF','#00B8FF','#009CFF','#0080FF','#0064FF','#0048FF','#002CFF',
-                           '#0010FF','#0000FF','#0000CC'])
+        marker=dict(color=['#00D4FF','#00B8FF','#009CFF','#0080FF','#0064FF','#0048FF',
+                           '#002CFF','#0010FF','#0000FF','#0000CC'])
     ))
     fig.update_layout(title="LIVE MEME PULSE", template="plotly_dark", height=700,
                       xaxis_title="Growth %", yaxis_title="Meme")
     return fig, msg
 
+# ---------------------- RUN ----------------------
 if __name__ == '__main__':
-    threading.Thread(target=run, daemon=True).start()  # поток запускается только при ручном запуске
     app.run_server(debug=False)
