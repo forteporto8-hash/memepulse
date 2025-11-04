@@ -1,5 +1,8 @@
 from dash import Dash,dcc,html,Input,Output
 import plotly.graph_objs as go
+import threading
+import time
+import random
 
 app=Dash(__name__)
 app.title="MemePulse"
