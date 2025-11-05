@@ -1,5 +1,5 @@
 dash
 plotly
-tweepy
-praw
 gunicorn
+requests
+bs4
