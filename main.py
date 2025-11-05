@@ -22,7 +22,8 @@ def get_x_memes():
     if X_BEARER:
         try:
             client = tweepy.Client(bearer_token=X_BEARER)
-            tweets = client.search_recent_tweets(query="#meme OR #funny -is:retweet lang:en", max_results=10)
+            tweets = client.search_recent_tweets(query="#meme OR #funny -is:retweet lang:en", max_results=10,
+                                                 tweet_fields=["public_metrics"])
             for t in (tweets.data or []):
                 memes.append({
                     "meme": t.text[:30] + "...",
@@ -64,10 +65,7 @@ def get_tiktok_memes():
 def run():
     global data
     while True:
-        all_memes = []
-        all_memes += get_x_memes()
-        all_memes += get_reddit_memes()
-        all_memes += get_tiktok_memes()
+        all_memes = get_tiktok_memes() + get_x_memes() + get_reddit_memes()
         data = sorted(all_memes, key=lambda x: x['growth'], reverse=True)[:10]
         time.sleep(30)
 
@@ -87,7 +85,7 @@ app.layout = html.Div([
     dcc.Interval(id="interval", interval=30000)
 ], style={'background':'#000','color':'white','fontFamily':'Montserrat','padding':'20px','minHeight':'100vh'})
 
-@callback(
+@app.callback(
     [Output('live','figure'), Output('free-msg','children')],
     [Input('interval','n_intervals'), Input('free','n_clicks')]
 )
